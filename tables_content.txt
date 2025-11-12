@@ -1,0 +1,194 @@
+# Functional Dependency Analysis for IPO Management System md.file
+
+## Overview
+This document presents the functional dependency (FD) analysis of all major tables in the IPO Management System.  
+Each section identifies:
+- The primary key
+- Non-trivial functional dependencies
+- Any partial or transitive dependencies
+- Clarifying notes or constraints related to normalization and design
+
+The system is normalized up to **Third Normal Form (3NF)** to avoid redundancy and maintain referential integrity.
+
+---
+
+## 1. Companies Table
+- **Primary Key**: `CompanyID`
+- **Attributes**: `CompanyName`, `Sector`, `CEO`, `Headquarters`, `IncorporationDate`, `Website`, `created_at`, `updated_at`, `is_active`
+- **Non-Trivial FDs**:  
+  - `CompanyID → CompanyName, Sector, CEO, Headquarters, IncorporationDate, Website, created_at, updated_at, is_active`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**: None  
+- **Notes**:  
+  - `CompanyName` should be unique (or unique in combination with `Headquarters` depending on business rules).
+
+---
+
+## 2. IPO_Issues Table
+- **Primary Key**: `IPOID`
+- **Attributes**: `CompanyID (FK)`, `IssueDate`, `OpenDate`, `CloseDate`, `PricePerShare`, `TotalShares`, `Status`, `created_at`, `updated_at`
+- **Non-Trivial FDs**:  
+  - `IPOID → CompanyID, IssueDate, OpenDate, CloseDate, PricePerShare, TotalShares, Status, created_at, updated_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `IPOID → CompanyID → CompanyName` (Avoid storing `CompanyName` here; use a join instead)
+- **Notes**:  
+  - Indexes recommended on `IssueDate` and `Status` for query performance.  
+  - Optional foreign key: `BrokerID → Brokers.BrokerID` if IPOs are managed by brokers.
+
+---
+
+## 3. Investors Table
+- **Primary Key**: `InvestorID`
+- **Attributes**: `Name`, `Email`, `Phone`, `PAN`, `Address`, `KYCStatus`, `created_at`, `updated_at`
+- **Non-Trivial FDs**:  
+  - `InvestorID → Name, Email, Phone, PAN, Address, KYCStatus, created_at, updated_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**: None  
+- **Notes**:  
+  - `PAN` and `Email` must be unique to maintain data integrity.
+
+---
+
+## 4. Applications Table
+- **Primary Key**: `ApplicationID` (surrogate key)
+- **Alternate Key**: Composite (`IPOID`, `InvestorID`)
+- **Attributes**: `IPOID (FK)`, `InvestorID (FK)`, `SharesApplied`, `ApplicationDate`, `Status`, `created_at`, `updated_at`
+- **Non-Trivial FDs**:  
+  - `ApplicationID → IPOID, InvestorID, SharesApplied, ApplicationDate, Status, created_at, updated_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `ApplicationID → InvestorID → InvestorName` (Do not store `InvestorName` here)
+- **Notes**:  
+  - If `ApplicationID` is used as a surrogate key, ensure **`(IPOID, InvestorID)` is unique** to prevent duplicate applications.  
+  - This maintains business rules and avoids data redundancy.
+
+---
+
+## 5. Allotments Table
+- **Primary Key**: `AllotmentID`
+- **Attributes**: `ApplicationID (FK)`, `SharesAllotted`, `AllotmentDate`, `PaymentStatus`, `created_at`
+- **Non-Trivial FDs**:  
+  - `AllotmentID → ApplicationID, SharesAllotted, AllotmentDate, PaymentStatus, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `AllotmentID → ApplicationID → IPOID, InvestorID`
+- **Notes**:  
+  - Allotments depend on applications; hence, the relationship is strictly one-to-one.
+
+---
+
+## 6. Transactions Table
+- **Primary Key**: `TransactionID`
+- **Attributes**: `InvestorID (FK)`, `Amount`, `TransactionDate`, `PaymentMethod`, `ReferenceNumber`, `Status`, `created_at`
+- **Non-Trivial FDs**:  
+  - `TransactionID → InvestorID, Amount, TransactionDate, PaymentMethod, ReferenceNumber, Status, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `TransactionID → InvestorID → InvestorName`
+- **Notes**:  
+  - Avoid storing investor details directly here.  
+  - Maintain referential integrity using `InvestorID`.
+
+---
+
+## 7. Admin Table
+- **Primary Key**: `AdminID`
+- **Attributes**: `Username`, `Email`, `PasswordHash`, `Role`, `LastLogin`, `created_at`
+- **Non-Trivial FDs**:  
+  - `AdminID → Username, Email, Role, LastLogin, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**: None  
+- **Notes**:  
+  - `PasswordHash` is stored securely and **not considered part of functional dependency analysis**, as it is not derived data.  
+  - Enforce unique constraints on `Username` and `Email`.
+
+---
+
+## 8. Brokers Table
+- **Primary Key**: `BrokerID`
+- **Attributes**: `BrokerName`, `LicenseNumber`, `ContactInfo`, `created_at`
+- **Non-Trivial FDs**:  
+  - `BrokerID → BrokerName, LicenseNumber, ContactInfo, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**: None  
+- **Notes**:  
+  - `LicenseNumber` should be unique to prevent duplication.
+
+---
+
+## 9. Compliance Table
+- **Primary Key**: `ComplianceID`
+- **Attributes**: `InvestorID (FK)`, `KYCStatus`, `AMLFlag`, `LastAuditDate`, `Notes`, `created_at`
+- **Non-Trivial FDs**:  
+  - `ComplianceID → InvestorID, KYCStatus, AMLFlag, LastAuditDate, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `ComplianceID → InvestorID → InvestorName`
+- **Notes**:  
+  - `Notes` is **optional** and may not be functionally dependent on `ComplianceID`.  
+  - Avoid duplicating investor details; use joins instead.
+
+---
+
+## 10. Notifications Table
+- **Primary Key**: `NotificationID`
+- **Attributes**: `RecipientType`, `RecipientID`, `Message`, `Timestamp`, `Type`, `read_flag`, `created_at`
+- **Non-Trivial FDs**:  
+  - `NotificationID → RecipientType, RecipientID, Message, Timestamp, Type, read_flag, created_at`
+- **Partial Dependencies**: None  
+- **Transitive Dependencies**:  
+  - `NotificationID → RecipientID → InvestorName or AdminName` (depending on `RecipientType`)
+- **Notes**:  
+  - `RecipientType` (ENUM: `INVESTOR`, `ADMIN`, `BROKER`) defines which entity receives the message.  
+  - Since `RecipientID` is polymorphic, **referential integrity cannot be strictly enforced**.  
+  - **Alternative approach:** Split into `InvestorNotifications` and `AdminNotifications` for strict foreign key enforcement.
+
+---
+
+## Foreign Key Relationships
+| Child Table | Foreign Key | References | On Delete | On Update |
+|--------------|--------------|-------------|------------|------------|
+| `IPO_Issues` | `CompanyID` | `Companies(CompanyID)` | RESTRICT | CASCADE |
+| `Applications` | `IPOID` | `IPO_Issues(IPOID)` | RESTRICT | CASCADE |
+| `Applications` | `InvestorID` | `Investors(InvestorID)` | CASCADE | CASCADE |
+| `Allotments` | `ApplicationID` | `Applications(ApplicationID)` | CASCADE | CASCADE |
+| `Transactions` | `InvestorID` | `Investors(InvestorID)` | CASCADE | CASCADE |
+| `Compliance` | `InvestorID` | `Investors(InvestorID)` | CASCADE | CASCADE |
+| *(Optional)* `IPO_Issues` | `BrokerID` | `Brokers(BrokerID)` | SET NULL | CASCADE |
+
+---
+
+## Constraints and Indexes
+- `UNIQUE (Investors.PAN)`
+- `UNIQUE (Investors.Email)`
+- `UNIQUE (Brokers.LicenseNumber)`
+- `UNIQUE (Applications.IPOID, Applications.InvestorID)` *(if ApplicationID is surrogate key)*
+- Indexes:
+  - `IPO_Issues (IssueDate)`
+  - `IPO_Issues (Status)`
+  - `Applications (IPOID)`
+  - `Applications (InvestorID)`
+  - `Transactions (InvestorID)`
+
+---
+
+## Normalization Summary
+| Normal Form | Achieved | Description |
+|--------------|-----------|-------------|
+| **1NF** | ✅ | All tables have atomic attributes (no repeating groups). |
+| **2NF** | ✅ | Each non-key attribute fully depends on the entire primary key (or surrogate key). |
+| **3NF** | ✅ | All transitive dependencies are eliminated; non-key attributes depend only on the key. |
+
+---
+
+## Conclusion
+The IPO Management System database design satisfies **Third Normal Form (3NF)**.  
+- All transitive dependencies are properly identified and addressed.  
+- Surrogate keys are used for simplicity, while composite uniqueness constraints ensure data integrity.  
+- Optional attributes like `Notes` or security fields like `PasswordHash` are documented explicitly for clarity.  
+- Referential integrity and normalization are maintained across all tables.
+
+This structured approach ensures minimal redundancy, optimal data consistency, and scalability for the IPO Management System.
+
+---
