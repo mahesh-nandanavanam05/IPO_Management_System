@@ -1,0 +1,48 @@
+<style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#1e3a8a;
+      --accent:#0ea5a4;
+      --danger:#ef4444;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#f7fafc,#eef2ff);color:#0f172a}
+    .container{max-width:1200px;margin:24px auto;padding:20px}
+    .grid{display:grid;gap:20px}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    header.flex{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .kpi{display:flex;gap:12px}
+    .kpi .tile{padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#f8fafc);min-width:160px}
+    .kpi .value{font-size:20px;font-weight:700}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{display:inline-block;padding:8px 14px;border-radius:8px;background:var(--primary);color:#fff;text-decoration:none;cursor:pointer;border:none}
+    .btn.ghost{background:transparent;color:var(--primary);border:1px solid rgba(30,58,138,0.12)}
+    .btn.danger{background:var(--danger)}
+    .table{width:100%;border-collapse:collapse;margin-top:12px}
+    .table th, .table td{padding:10px 8px;text-align:left;border-bottom:1px solid #eef2ff;font-size:13px}
+    .toolbar{display:flex;gap:10px;align-items:center}
+    .search{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#fbfdff;min-width:220px}
+    .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(4,6,8,0.4);z-index:999}
+    .modal.active{display:flex}
+    .modal .panel{width:720px;max-width:95%;background:var(--card);padding:18px;border-radius:12px}
+    .form-row{display:flex;gap:12px;margin-bottom:10px}
+    .form-row .col{flex:1}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type="text"], input[type="email"], input[type="date"], input[type="number"], select, textarea{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;background:#fff;font-size:14px;
+    }
+    .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    nav.side{width:220px;min-height:80vh;padding:18px;border-radius:12px;background:linear-gradient(180deg,#eaf2ff,#fff);position:sticky;top:18px}
+    .layout{display:flex;gap:20px}
+    .nav-item{padding:10px;border-radius:8px;display:flex;gap:12px;align-items:center;color:#0f172a;text-decoration:none}
+    .nav-item.active{background:linear-gradient(90deg, #e2e8f0, #fff)}
+    footer.small{font-size:12px;color:var(--muted);margin-top:18px}
+    @media (max-width:900px){ .layout{flex-direction:column} nav.side{width:100%;position:relative} .grid.cols-3{grid-template-columns:1fr} }
+</style>
