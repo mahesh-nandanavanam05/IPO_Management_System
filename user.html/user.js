@@ -1,4 +1,3 @@
-<script>
     function submitForm() {
       const ipo = document.getElementById('ipo').value;
       const searchType = document.querySelector('input[name="searchType"]:checked').value;
@@ -16,4 +15,3 @@
 
       alert(`Searching allotment for IPO: ${ipo}\nSearch Type: ${searchType}\nPAN: ${pan}`);
     }
-</script>
